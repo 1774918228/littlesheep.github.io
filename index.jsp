@@ -5,7 +5,7 @@
   Time: 16:38
   To change this template use File | Settings | File Templates.
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!-- <%@ page contentType="text/html;charset=UTF-8" language="java" %> -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -24,14 +24,13 @@
 <body data-theme="dark">
 <div class="lyear-layout-web">
     <div class="lyear-layout-container">
-<%--        左侧菜单--%>
+<!--       左侧菜单 -->
         <jsp:include page="/common/left.jsp" />
-
-<%--        头部--%>
+<!--       头部 -->
         <jsp:include page="/common/head.jsp" />
 
 
-        <!--页面主要内容-->
+<!--         页面主要内容 -->
         <main class="lyear-layout-content">
 
             <div class="container-fluid">
