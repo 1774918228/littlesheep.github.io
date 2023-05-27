@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qfedu.mapper.RoleMapper">
+    <insert id="addRole">
+        <selectKey keyColumn="id" keyProperty="id" resultType="Long"  order="AFTER">
+            select last_insert_id()
+        </selectKey>
+        insert into t_role (name) values (#{name})
+    </insert>
+    <update id="updateRole">
+        update t_role set name=#{name} where id =#{id}
+    </update>
+    <delete id="deleteRole">
+        delete from t_role where id =#{id}
+    </delete>
+
+    <select id="queryRoleByUserId" resultType="com.qfedu.bean.Role">
+        select distinct  t1.* from t_role t1,t_user_role t2 where t1.id=t2.roleid
+          and t2.userid=#{uid}
+    </select>
+
+    <resultMap id="roleMap" type="role">
+        <id column="id" property="id"></id>
+        <result column="name" property="name"></result>
+        <result column="sn" property="sn"></result>
+        <result column="desc" property="desc"></result>
+        <collection property="permissions" ofType="permission">
+            <id column="mid" property="id"></id>
+            <result column="mname" property="name"></result>
+            <result column="mtitle" property="title"></result>
+            <result column="pid" property="pid"></result>
+            <result column="menuid" property="menuid"></result>
+        </collection>
+    </resultMap>
+    <select id="queryAllRoleAndPermission" resultMap="roleMap">
+        select t1.* ,t3.id mid,t3.name mname,t3.title mtitle,t3.pid,t3.menuid  from t_role t1
+                  left join t_role_permission t2  on t1.id = t2.roleid
+                   left join t_permission t3   on t2.permissionid = t3.id
+                   order by t1.id
+    </select>
+</mapper>

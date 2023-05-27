@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qfedu.mapper.UserMapper">
+    <insert id="addUser">
+         insert into t_user (username,password,email,tel,createTime,sex,headImg)
+                values  (#{username},#{password},#{email},#{tel},#{createTime},#{sex},#{headImg})
+
+
+    </insert>
+    <update id="updateUser">
+         update t_user  set email=#{email},
+                            username=#{username},
+                            tel=#{tel},
+                            sex=#{sex}
+                         where id =#{id}
+
+
+    </update>
+    <delete id="delUser">
+         delete  from t_user where id =#{id}
+    </delete>
+    <delete id="delUserBatch">
+
+        delete  from t_user  where
+          <foreach collection="array"  item="id" open=" id in ( "  close=")" separator=","  >
+              #{id}
+          </foreach>
+    </delete>
+    <select id="findUserByName" resultType="com.qfedu.bean.User">
+        select * from t_user  where username =#{username}
+    </select>
+    <resultMap id="userMap" type="user">
+         <id column="id" property="id"></id>
+        <result column="username" property="username"></result>
+        <result column="email" property="email"></result>
+        <result column="tel" property="tel"></result>
+        <result column="createTime" property="createTime"></result>
+        <result column="sex" property="sex"></result>
+        <result column="headImg" property="headImg"></result>
+        <collection property="roles" ofType="role">
+            <id column="rid" property="id"></id>
+            <result column="rname" property="name"></result>
+            <result column="rsn" property="sn"></result>
+            <result column="rdesc" property="desc"></result>
+        </collection>
+    </resultMap>
+    <select id="findAllUsers" resultMap="userMap">
+        select  t1.* ,t3.id rid,t3.name rname,t3.sn rsn ,t3.desc rdesc
+               from t_user t1 left join t_user_role t2  on t1.id = t2.userid
+                              left join  t_role t3      on t2.roleid = t3.id
+                   <where>
+                       <if test="username!=null and username!='' ">
+                           and t1.username  like concat('%',#{username},'%')
+                       </if>
+                       <if test="email!=null and email!='' ">
+                           and t1.email = #{email}
+                       </if>
+                   </where>
+    </select>
+</mapper>

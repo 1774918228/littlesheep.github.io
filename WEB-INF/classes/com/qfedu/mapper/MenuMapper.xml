@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qfedu.mapper.MenuMapper">
+    <resultMap id="menuMap" type="menu">
+       <id column="id" property="id"></id>
+       <result column="name" property="name"></result>
+        <result column="url" property="url"></result>
+        <result column="pid" property="pid"></result>
+        <result column="icon" property="icon"></result>
+       <collection property="child" ofType="menu">
+           <id column="sid" property="id"></id>
+           <result column="sname" property="name"></result>
+           <result column="surl" property="url"></result>
+           <result column="spid" property="pid"></result>
+           <result column="sicon" property="icon"></result>
+       </collection>
+    </resultMap>
+    <insert id="addMenu">
+        insert into t_menu (name ,url,pid,icon)
+                values  (#{name},#{url},#{pid},#{icon})
+    </insert>
+    <insert id="addSubMenu">
+       <selectKey keyColumn="id" keyProperty="id" resultType="long" order="AFTER">
+           select last_insert_id()
+       </selectKey>
+        insert into t_menu (name ,url,pid,icon)  values  (#{name},#{url},#{pid},#{icon})
+    </insert>
+    <update id="updateMenu">
+       update t_menu
+           <set>
+              <if test="name!=null and name!=''">
+               name = #{name} ,
+             </if>
+               <if test="url!=null and url!=''">
+                   url = #{url} ,
+               </if>
+               <if test="icon!=null and icon!=''">
+                   icon = #{icon} ,
+               </if>
+           </set>
+         where id =#{id}
+    </update>
+    <delete id="deleteMenu">
+        delete  from t_menu where id =#{id} or pid =#{id}
+    </delete>
+    <select id="queryMenuByUid" resultMap="menuMap">
+        select  DISTINCT t1.*,t6.id sid,t6.name sname,t6.url surl,t6.pid spid,t6.icon sicon from t_menu t1,
+               (
+                select t2.* from t_menu t2,
+                                 t_permission t3,
+                                 t_role_permission t4,
+                                 t_user_role t5
+                             where t2.id = t3.menuid and
+                                    t3.id = t4.permissionid and
+                                    t4.roleid = t5.roleid and
+                                    t5.userid =#{uid}
+               )  t6
+        where  t1.id = t6.pid and t1.pid is null
+    </select>
+     <resultMap id="menuMap1" type="menu">
+         <id column="id" property="id"></id>
+         <result column="name" property="name"></result>
+         <result column="url" property="url"></result>
+         <result column="pid" property="pid"></result>
+         <result column="icon" property="icon"></result>
+         <association property="permission" javaType="permission">
+             <id column="mid" property="id"></id>
+             <result column="mname" property="name"></result>
+             <result column="title" property="title"></result>
+             <result column="mpid" property="pid"></result>
+             <result column="menuid" property="menuid"></result>
+         </association>
+     </resultMap>
+
+    <select id="queryAllMenusAndPermisson"  resultMap="menuMap1">
+        select t1.* ,t2.id mid,t2.name mname,t2.title, t2.pid mpid,t2.menuid
+             from t_menu t1 left join t_permission t2
+                       on    t1.id = t2.menuid
+    </select>
+    <select id="queryMenuById" resultType="com.qfedu.bean.Menu">
+
+          select * from t_menu where id =#{id} or pid =#{id}
+
+    </select>
+</mapper>

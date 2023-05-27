@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qfedu.mapper.PermissionMapper">
+    <insert id="addPermission">
+      insert into t_permission (name,title,pid,menuid)
+                  values (#{name},#{title},#{pid},#{menuid})
+    </insert>
+    <update id="updatePermission">
+
+       update t_permission  set  name=#{name},title=#{title}  where id =#{id}
+
+
+    </update>
+    <!--     删除二级权限-->
+    <delete id="deletePermissionS">
+        delete  from t_permission where pid=
+              ( select id  from  ( select id from t_permission where  menuid= #{menuid}) t)
+    </delete>
+<!--    删除一级权限-->
+    <delete id="deletePermissionP">
+        delete  from t_permission where menuid= #{menuid}
+    </delete>
+    <delete id="deletePermission">
+
+       delete from t_permission where id =#{id}
+
+    </delete>
+    <select id="queryPermissionByUid" resultType="com.qfedu.bean.Permission">
+
+       select distinct t1.*  from t_permission t1, t_role_permission t2,t_user_role t3
+             where t1.id = t2.permissionid and t2.roleid = t3.roleid
+                  and t3.userid = #{uid}
+
+    </select>
+    <select id="queryAllPermissions" resultType="com.qfedu.bean.Permission">
+       select * from t_permission
+    </select>
+    <select id="queryPermissionByRoleid" resultType="com.qfedu.bean.Permission">
+        select t1.* from t_permission t1 , t_role_permission t2
+                    where t1.id = t2.permissionid  and t2.roleid = #{roleid}
+    </select>
+    <resultMap id="permissionMap" type="permission">
+        <id column="id" property="id"></id>
+        <result column="name" property="name"></result>
+        <result column="title" property="title"></result>
+        <result column="pid" property="pid"></result>
+        <result column="menuid" property="menuid"></result>
+        <association property="menu" javaType="menu">
+            <id column="mid" property="id"></id>
+            <result column="mname" property="name"></result>
+            <result column="murl" property="url"></result>
+            <result column="mpid" property="pid"></result>
+            <result column="micon" property="icon"></result>
+        </association>
+    </resultMap>
+    <select id="queryAllPermissionAndMenu" resultMap="permissionMap">
+        select t1.*,t2.id mid,t2.name mname,t2.url murl ,t2.pid mpid,t2.icon micon
+                               from t_permission t1
+                            left join t_menu t2 on t1.menuid = t2.id
+
+    </select>
+</mapper>
